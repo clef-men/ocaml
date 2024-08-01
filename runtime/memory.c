@@ -342,17 +342,19 @@ CAMLexport int caml_atomic_cas_field (
 }
 
 
-CAMLprim value caml_atomic_load (value ref)
+CAMLprim value caml_atomic_load_field (value obj, intnat field)
 {
   if (caml_domain_alone()) {
-    return Field(ref, 0);
+    return Field(obj, field);
   } else {
-    value v;
     /* See Note [MM] above */
     atomic_thread_fence(memory_order_acquire);
-    v = atomic_load(Op_atomic_val(ref));
-    return v;
+    return atomic_load(&Op_atomic_val(obj)[field]);
   }
+}
+CAMLprim value caml_atomic_load (value obj)
+{
+	return caml_atomic_load_field(obj, 0);
 }
 
 /* stores are implemented as exchanges */

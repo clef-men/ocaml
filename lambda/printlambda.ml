@@ -357,6 +357,7 @@ let primitive ppf = function
   | Patomic_exchange -> fprintf ppf "atomic_exchange"
   | Patomic_cas -> fprintf ppf "atomic_cas"
   | Patomic_fetch_add -> fprintf ppf "atomic_fetch_add"
+  | Patomic_load_field fld -> fprintf ppf "atomic_load_field %i" fld
   | Popaque -> fprintf ppf "opaque"
   | Pdls_get -> fprintf ppf "dls_get"
   | Ppoll -> fprintf ppf "poll"
@@ -469,6 +470,7 @@ let name_of_primitive = function
   | Patomic_exchange -> "Patomic_exchange"
   | Patomic_cas -> "Patomic_cas"
   | Patomic_fetch_add -> "Patomic_fetch_add"
+  | Patomic_load_field _ -> "Patomic_load_field"
   | Popaque -> "Popaque"
   | Prunstack -> "Prunstack"
   | Presume -> "Presume"

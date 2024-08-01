@@ -325,7 +325,7 @@ and transl_exp0 ~in_new_scope ~scopes e =
   | Texp_record {fields; representation; extended_expression} ->
       transl_record ~scopes e.exp_loc e.exp_env
         fields representation extended_expression
-  | Texp_field(arg, _, lbl) ->
+  | Texp_field(arg, _, lbl) when not lbl.lbl_atomic ->
       let targ = transl_exp ~scopes arg in
       begin match lbl.lbl_repres with
           Record_regular | Record_inlined _ ->
@@ -338,6 +338,18 @@ and transl_exp0 ~in_new_scope ~scopes e =
         | Record_extension _ ->
           Lprim (Pfield (lbl.lbl_pos + 1, maybe_pointer e, lbl.lbl_mut), [targ],
                  of_location ~scopes e.exp_loc)
+      end
+  | Texp_field(arg, _, lbl) ->
+      let targ = transl_exp ~scopes arg in
+      begin match lbl.lbl_repres with
+          Record_regular | Record_inlined _ ->
+          Lprim (Patomic_load_field lbl.lbl_pos, [targ],
+                 of_location ~scopes e.exp_loc)
+        | Record_unboxed _
+        | Record_float
+        | Record_extension _ ->
+          (* TODO *)
+          assert false
       end
   | Texp_setfield(arg, _, lbl, newval) ->
       let access =

@@ -82,6 +82,7 @@ void caml_disasm_instr(code_t pc)
   case CONSTINT: case PUSHCONSTINT: case OFFSETINT: case OFFSETREF:
   case OFFSETCLOSURE: case PUSHOFFSETCLOSURE:
   case RESUMETERM: case REPERFORMTERM:
+	case GETATOMICFIELD:
     snprintf(buf, sizeof(buf), "%s %d\n", opbuf, pc[0]); break;
     /* Instructions with two operands */
   case APPTERM: case CLOSURE: case CLOSUREREC: case PUSHGETGLOBALFIELD:

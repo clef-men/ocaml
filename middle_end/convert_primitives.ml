@@ -149,6 +149,7 @@ let convert (prim : Lambda.primitive) : Clambda_primitives.primitive =
   | Patomic_exchange -> Patomic_exchange
   | Patomic_cas -> Patomic_cas
   | Patomic_fetch_add -> Patomic_fetch_add
+  | Patomic_load_field fld -> Patomic_load_field fld
   | Popaque -> Popaque
   | Pdls_get -> Pdls_get
   | Ppoll -> Ppoll

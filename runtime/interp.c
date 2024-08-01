@@ -1411,6 +1411,10 @@ do_resume: {
       goto check_stacks;
     }
 
+		Instruct(GETATOMICFIELD): {
+			accu = caml_atomic_load_field(accu, *pc); pc++; Next;
+		}
+
 #ifndef THREADED_CODE
     default:
 #ifdef _MSC_VER
