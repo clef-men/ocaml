@@ -354,6 +354,11 @@ and transl_exp0 ~in_new_scope ~scopes e =
           (* TODO *)
           assert false
       end
+  | Texp_atomic_loc (arg, _, lbl) ->
+      let shape = Some [Typeopt.value_kind arg.exp_env arg.exp_type; Pintval] in
+      let arg = transl_exp ~scopes arg in
+      let lbl = Lconst (Const_base (Const_int lbl.lbl_pos)) in
+      Lprim (Pmakeblock(0, Immutable, shape), [arg; lbl], of_location ~scopes e.exp_loc)
   | Texp_setfield (arg, _, lbl, newval) when not lbl.lbl_atomic ->
       let access =
         match lbl.lbl_repres with

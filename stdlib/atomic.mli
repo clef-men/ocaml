@@ -15,6 +15,10 @@
 (*                                                                        *)
 (**************************************************************************)
 
+module Loc : sig
+  type 'a t
+end
+
 (** Atomic references.
 
   See {{!examples} the examples} below.

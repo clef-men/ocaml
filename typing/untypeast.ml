@@ -501,6 +501,9 @@ let expression sub exp =
     | Texp_setfield (exp1, lid, _label, exp2) ->
         Pexp_setfield (sub.expr sub exp1, map_loc sub lid,
           sub.expr sub exp2)
+    | Texp_atomic_loc (_exp, _lid, _label) ->
+        (* TODO *)
+        assert false
     | Texp_array list ->
         Pexp_array (List.map (sub.expr sub) list)
     | Texp_ifthenelse (exp1, exp2, expo) ->

@@ -12,6 +12,10 @@
 (*                                                                        *)
 (**************************************************************************)
 
+module Loc = struct
+  type 'a t
+end
+
 type !'a t
 
 external make : 'a -> 'a t = "%makemutable"

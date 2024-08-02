@@ -187,6 +187,8 @@ type error =
   | Unrefuted_pattern of pattern
   | Invalid_extension_constructor_payload
   | Not_an_extension_constructor
+  | Invalid_atomic_loc_payload
+  | Not_an_atomic_field
   | Literal_overflow of string
   | Unknown_literal of string * char
   | Illegal_letrec_pat
@@ -2619,6 +2621,7 @@ let rec is_nonexpansive exp =
   | Texp_field(exp, _, _) -> is_nonexpansive exp
   | Texp_ifthenelse(_cond, ifso, ifnot) ->
       is_nonexpansive ifso && is_nonexpansive_opt ifnot
+  | Texp_atomic_loc(exp, _, _) -> is_nonexpansive exp
   | Texp_sequence (_e1, e2) -> is_nonexpansive e2  (* PR#4354 *)
   | Texp_new (_, _, cl_decl) -> Btype.class_type_arity cl_decl.cty_type > 0
   (* Note: nonexpansive only means no _observable_ side effects *)
@@ -2953,7 +2956,7 @@ let check_partial_application ~statement exp =
             match exp_desc with
             | Texp_ident _ | Texp_constant _ | Texp_tuple _
             | Texp_construct _ | Texp_variant _ | Texp_record _
-            | Texp_field _ | Texp_setfield _ | Texp_array _
+            | Texp_field _ | Texp_setfield _ | Texp_atomic_loc _ | Texp_array _
             | Texp_while _ | Texp_for _ | Texp_instvar _
             | Texp_setinstvar _ | Texp_override _ | Texp_assert _
             | Texp_lazy _ | Texp_object _ | Texp_pack _ | Texp_unreachable
@@ -4373,6 +4376,25 @@ and type_expect_
             exp_env = env }
       | _ ->
           raise (Error (loc, env, Invalid_extension_constructor_payload))
+      end
+  | Pexp_extension ({ txt = ("ocaml.atomic.loc"
+                             |"atomic.loc"); _ },
+                    payload) ->
+      begin match payload with
+      | PStr [{ pstr_desc = Pstr_eval ({ pexp_desc = Pexp_field _; _ } as exp, _) }] ->
+          let exp = type_exp env exp in
+          let[@warning "-8"] Texp_field (srecord, lid, label) = exp.exp_desc in
+          if not label.lbl_atomic then
+            raise (Error (label.lbl_loc, env, Not_an_atomic_field)) ;
+          let path = Path.Pdot (Pdot (Pident (Ident.create_persistent "Atomic"), "Loc"), "t") in
+          rue {
+            exp_desc = Texp_atomic_loc (srecord, lid, label);
+            exp_loc = loc; exp_extra = [];
+            exp_type = newgenty (Tconstr (path, [exp.exp_type], ref Mnil));
+            exp_attributes = sexp.pexp_attributes;
+            exp_env = env }
+      | _ ->
+          raise (Error (loc, env, Invalid_atomic_loc_payload))
       end
   | Pexp_extension ext ->
       raise (Error_forward (Builtin_attributes.error_of_extension ext))
@@ -6964,6 +6986,13 @@ let report_error ~loc env = function
   | Not_an_extension_constructor ->
       Location.errorf ~loc
         "This constructor is not an extension constructor."
+  | Invalid_atomic_loc_payload ->
+      Location.errorf ~loc
+        "Invalid %a payload, a record field access is expected."
+        Style.inline_code "[%atomic.loc]"
+  | Not_an_atomic_field ->
+      Location.errorf ~loc
+        "This record field is not atomic."
   | Literal_overflow ty ->
       Location.errorf ~loc
         "Integer literal exceeds the range of representable integers of type %a"
