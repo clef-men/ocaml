@@ -825,7 +825,7 @@ let lambda_primitive_needs_event_after = function
   | Pfloatcomp _ | Pstringlength | Pstringrefu | Pbyteslength | Pbytesrefu
   | Pbytessetu | Pmakearray ((Pintarray | Paddrarray | Pfloatarray), _)
   | Parraylength _ | Parrayrefu _ | Parraysetu _ | Pisint | Pisout
-  | Patomic_exchange | Patomic_cas | Patomic_fetch_add | Patomic_load _ | Patomic_load_field _
+  | Patomic_exchange | Patomic_cas | Patomic_fetch_add | Patomic_load _ | Patomic_load_field _ | Patomic_store_field _
   | Pintofbint _ | Pctconst _ | Pbswap16 | Pint_as_pointer | Popaque | Pdls_get
       -> false
 

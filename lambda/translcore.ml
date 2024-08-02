@@ -325,13 +325,15 @@ and transl_exp0 ~in_new_scope ~scopes e =
   | Texp_record {fields; representation; extended_expression} ->
       transl_record ~scopes e.exp_loc e.exp_env
         fields representation extended_expression
-  | Texp_field(arg, _, lbl) when not lbl.lbl_atomic ->
+  | Texp_field (arg, _, lbl) when not lbl.lbl_atomic ->
       let targ = transl_exp ~scopes arg in
       begin match lbl.lbl_repres with
-          Record_regular | Record_inlined _ ->
+          Record_regular
+        | Record_inlined _ ->
           Lprim (Pfield (lbl.lbl_pos, maybe_pointer e, lbl.lbl_mut), [targ],
                  of_location ~scopes e.exp_loc)
-        | Record_unboxed _ -> targ
+        | Record_unboxed _ ->
+          targ
         | Record_float ->
           Lprim (Pfloatfield lbl.lbl_pos, [targ],
                  of_location ~scopes e.exp_loc)
@@ -339,10 +341,11 @@ and transl_exp0 ~in_new_scope ~scopes e =
           Lprim (Pfield (lbl.lbl_pos + 1, maybe_pointer e, lbl.lbl_mut), [targ],
                  of_location ~scopes e.exp_loc)
       end
-  | Texp_field(arg, _, lbl) ->
+  | Texp_field (arg, _, lbl) ->
       let targ = transl_exp ~scopes arg in
       begin match lbl.lbl_repres with
-          Record_regular | Record_inlined _ ->
+          Record_regular
+        | Record_inlined _ ->
           Lprim (Patomic_load_field lbl.lbl_pos, [targ],
                  of_location ~scopes e.exp_loc)
         | Record_unboxed _
@@ -351,19 +354,35 @@ and transl_exp0 ~in_new_scope ~scopes e =
           (* TODO *)
           assert false
       end
-  | Texp_setfield(arg, _, lbl, newval) ->
+  | Texp_setfield (arg, _, lbl, newval) when not lbl.lbl_atomic ->
       let access =
         match lbl.lbl_repres with
           Record_regular
         | Record_inlined _ ->
-          Psetfield(lbl.lbl_pos, maybe_pointer newval, Assignment)
-        | Record_unboxed _ -> assert false
-        | Record_float -> Psetfloatfield (lbl.lbl_pos, Assignment)
+          Psetfield (lbl.lbl_pos, maybe_pointer newval, Assignment)
+        | Record_unboxed _ ->
+          assert false
+        | Record_float ->
+          Psetfloatfield (lbl.lbl_pos, Assignment)
         | Record_extension _ ->
           Psetfield (lbl.lbl_pos + 1, maybe_pointer newval, Assignment)
       in
-      Lprim(access, [transl_exp ~scopes arg; transl_exp ~scopes newval],
-            of_location ~scopes e.exp_loc)
+      Lprim (access, [transl_exp ~scopes arg; transl_exp ~scopes newval],
+             of_location ~scopes e.exp_loc)
+  | Texp_setfield (arg, _, lbl, newval) ->
+      let access =
+        match lbl.lbl_repres with
+          Record_regular
+        | Record_inlined _ ->
+          Patomic_store_field lbl.lbl_pos
+        | Record_unboxed _
+        | Record_float
+        | Record_extension _ ->
+          (* TODO *)
+          assert false
+      in
+      Lprim (access, [transl_exp ~scopes arg; transl_exp ~scopes newval],
+             of_location ~scopes e.exp_loc)
   | Texp_array expr_list ->
       let kind = array_kind e in
       let ll = transl_list ~scopes expr_list in

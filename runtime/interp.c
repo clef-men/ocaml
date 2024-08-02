@@ -1412,7 +1412,13 @@ do_resume: {
     }
 
 		Instruct(GETATOMICFIELD): {
-			accu = caml_atomic_load_field(accu, *pc); pc++; Next;
+			accu = caml_atomic_load_field(accu, *pc++);
+			Next;
+		}
+		Instruct(SETATOMICFIELD): {
+			caml_atomic_store_field(accu, *pc++, *sp++);
+			accu = Val_unit;
+			Next;
 		}
 
 #ifndef THREADED_CODE

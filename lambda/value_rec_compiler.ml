@@ -309,6 +309,7 @@ let compute_static_size lam =
     | Patomic_cas
     | Patomic_fetch_add
     | Patomic_load_field _
+    | Patomic_store_field _
     | Popaque
     | Pdls_get ->
         dynamic_size ()

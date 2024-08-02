@@ -314,6 +314,50 @@ CAMLexport CAMLweakdef void caml_initialize (volatile value *fp, value val)
     Ref_table_add(&Caml_state->minor_tables->major_ref, fp);
 }
 
+CAMLexport value caml_atomic_load_field (value obj, intnat field)
+{
+  if (caml_domain_alone()) {
+    return Field(obj, field);
+  } else {
+    /* See Note [MM] above */
+    atomic_thread_fence(memory_order_acquire);
+    return atomic_load(&Op_atomic_val(obj)[field]);
+  }
+}
+CAMLprim value caml_atomic_load (value obj)
+{
+	return caml_atomic_load_field(obj, 0);
+}
+
+CAMLexport value caml_atomic_exchange_field (value obj, intnat field, value v)
+{
+  value ret;
+  if (caml_domain_alone()) {
+    ret = Field(obj, field);
+    Field(obj, field) = v;
+  } else {
+    /* See Note [MM] above */
+    atomic_thread_fence(memory_order_acquire);
+    ret = atomic_exchange(&Op_atomic_val(obj)[field], v);
+    atomic_thread_fence(memory_order_release); /* generates `dmb ish` on Arm64*/
+  }
+  write_barrier(obj, field, ret, v);
+  return ret;
+}
+CAMLprim value caml_atomic_exchange (value obj, value v)
+{
+	return caml_atomic_exchange_field(obj, 0, v);
+}
+
+CAMLexport void caml_atomic_store_field (value obj, intnat field, value v)
+{
+	caml_atomic_exchange_field(obj, field, v);
+}
+CAMLprim void caml_atomic_store (value obj, value v)
+{
+	caml_atomic_store_field(obj, 0, v);
+}
+
 CAMLexport int caml_atomic_cas_field (
   value obj, intnat field, value oldval, value newval)
 {
@@ -340,40 +384,6 @@ CAMLexport int caml_atomic_cas_field (
     }
   }
 }
-
-
-CAMLprim value caml_atomic_load_field (value obj, intnat field)
-{
-  if (caml_domain_alone()) {
-    return Field(obj, field);
-  } else {
-    /* See Note [MM] above */
-    atomic_thread_fence(memory_order_acquire);
-    return atomic_load(&Op_atomic_val(obj)[field]);
-  }
-}
-CAMLprim value caml_atomic_load (value obj)
-{
-	return caml_atomic_load_field(obj, 0);
-}
-
-/* stores are implemented as exchanges */
-CAMLprim value caml_atomic_exchange (value ref, value v)
-{
-  value ret;
-  if (caml_domain_alone()) {
-    ret = Field(ref, 0);
-    Field(ref, 0) = v;
-  } else {
-    /* See Note [MM] above */
-    atomic_thread_fence(memory_order_acquire);
-    ret = atomic_exchange(Op_atomic_val(ref), v);
-    atomic_thread_fence(memory_order_release); /* generates `dmb ish` on Arm64*/
-  }
-  write_barrier(ref, 0, ret, v);
-  return ret;
-}
-
 CAMLprim value caml_atomic_cas (value ref, value oldv, value newv)
 {
   if (caml_domain_alone()) {

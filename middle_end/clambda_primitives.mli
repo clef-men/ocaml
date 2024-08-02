@@ -128,6 +128,7 @@ type primitive =
   | Patomic_cas
   | Patomic_fetch_add
   | Patomic_load_field of int
+  | Patomic_store_field of int
   (* Inhibition of optimisation *)
   | Popaque
   (* Fetch domain-local state *)

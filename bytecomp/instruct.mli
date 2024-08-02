@@ -144,6 +144,7 @@ type instruction =
   | Kreperformterm of int
   | Kstop
   | Kgetatomicfield of int
+  | Ksetatomicfield of int
 
 val immed_min: int
 val immed_max: int
