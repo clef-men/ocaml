@@ -165,8 +165,8 @@ let preserve_tailcall_for_prim = function
   | Pbigstring_load_64 _ | Pbigstring_set_16 _ | Pbigstring_set_32 _
   | Pbigstring_set_64 _ | Pctconst _ | Pbswap16 | Pbbswap _ | Pint_as_pointer
   | Patomic_exchange | Patomic_cas | Patomic_fetch_add | Patomic_load _
-  | Patomic_load_field _ | Patomic_store_field _ | Patomic_exchange_field _ | Patomic_cas_field _
-  | Patomic_exchange_loc | Patomic_cas_loc
+  | Patomic_load_field _ | Patomic_store_field _ | Patomic_exchange_field _ | Patomic_cas_field _ | Patomic_fetch_add_field _
+  | Patomic_exchange_loc | Patomic_cas_loc | Patomic_fetch_add_loc
   | Pdls_get ->
       false
 
@@ -498,8 +498,10 @@ let comp_primitive stack_info p sz args =
   | Patomic_store_field fld -> Katomicsetfield fld
   | Patomic_exchange_field fld -> Katomicexchangefield fld
   | Patomic_cas_field fld -> Katomiccasfield fld
+  | Patomic_fetch_add_field fld -> Katomicfetchaddfield fld
   | Patomic_exchange_loc -> Kccall("caml_atomic_exchange_loc", 2)
   | Patomic_cas_loc -> Kccall("caml_atomic_cas_loc", 3)
+  | Patomic_fetch_add_loc -> Kccall("caml_atomic_fetch_add_loc", 2)
   | Pdls_get -> Kccall("caml_domain_dls_get", 1)
   | Ppoll -> Kccall("caml_process_pending_actions_with_root", 1)
   (* The cases below are handled in [comp_expr] before the [comp_primitive] call

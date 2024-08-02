@@ -153,8 +153,10 @@ let convert (prim : Lambda.primitive) : Clambda_primitives.primitive =
   | Patomic_store_field fld -> Patomic_store_field fld
   | Patomic_exchange_field fld -> Patomic_exchange_field fld
   | Patomic_cas_field fld -> Patomic_cas_field fld
+  | Patomic_fetch_add_field fld -> Patomic_fetch_add_field fld
   | Patomic_exchange_loc -> Patomic_exchange_loc
   | Patomic_cas_loc -> Patomic_cas_loc
+  | Patomic_fetch_add_loc -> Patomic_fetch_add_loc
   | Popaque -> Popaque
   | Pdls_get -> Pdls_get
   | Ppoll -> Ppoll

@@ -1430,6 +1430,10 @@ do_resume: {
 			accu = caml_atomic_cas_field(accu, *pc++, oldv, newv);
 			Next;
 		}
+		Instruct(ATOMICFETCHADDFIELD): {
+			accu = caml_atomic_fetch_add_field(accu, *pc++, *sp++);
+			Next;
+		}
 
 #ifndef THREADED_CODE
     default:

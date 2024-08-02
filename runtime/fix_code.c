@@ -112,13 +112,15 @@ int* caml_init_opcode_nargs(void)
       l[CONSTINT] = l[PUSHCONSTINT] = l[OFFSETINT] =
       l[OFFSETREF] = l[OFFSETCLOSURE] = l[PUSHOFFSETCLOSURE] =
       l[RESUMETERM] = l[REPERFORMTERM] =
-			l[ATOMICGETFIELD] = l[ATOMICSETFIELD] = l[ATOMICEXCHANGEFIELD] = l[ATOMICCASFIELD] = 1;
+			l[ATOMICGETFIELD] = l[ATOMICSETFIELD] = l[ATOMICEXCHANGEFIELD] = l[ATOMICCASFIELD] = l[ATOMICFETCHADDFIELD] =
+			1;
 
     /* Instructions with two operands */
     l[APPTERM] = l[CLOSURE] = l[PUSHGETGLOBALFIELD] =
       l[GETGLOBALFIELD] = l[MAKEBLOCK] = l[C_CALLN] =
       l[BEQ] = l[BNEQ] = l[BLTINT] = l[BLEINT] = l[BGTINT] = l[BGEINT] =
-      l[BULTINT] = l[BUGEINT] = l[GETPUBMET] = 2;
+      l[BULTINT] = l[BUGEINT] = l[GETPUBMET] =
+			2;
 
     opcode_nargs = l;
   }

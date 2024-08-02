@@ -396,21 +396,29 @@ CAMLprim value caml_atomic_cas_loc (value loc, value oldv, value newv)
 	return caml_atomic_cas_field(Field(loc, 0), Long_val(Field(loc, 1)), oldv, newv);
 }
 
-CAMLprim value caml_atomic_fetch_add (value ref, value incr)
+CAMLexport value caml_atomic_fetch_add_field (value obj, intnat field, value incr)
 {
   value ret;
   if (caml_domain_alone()) {
-    value* p = Op_val(ref);
-    CAMLassert(Is_long(*p));
+    value* p = &Op_val(obj)[field];
     ret = *p;
+    CAMLassert(Is_long(ret));
     *p = Val_long(Long_val(ret) + Long_val(incr));
     /* no write barrier needed, integer write */
   } else {
-    atomic_value *p = &Op_atomic_val(ref)[0];
-    ret = atomic_fetch_add(p, 2*Long_val(incr));
+    atomic_value *p = &Op_atomic_val(obj)[field];
+    ret = atomic_fetch_add(p, 2 * Long_val(incr));
     atomic_thread_fence(memory_order_release); /* generates `dmb ish` on Arm64*/
   }
   return ret;
+}
+CAMLprim value caml_atomic_fetch_add (value obj, value incr)
+{
+	return caml_atomic_fetch_add_field(obj, 0, incr);
+}
+CAMLprim value caml_atomic_fetch_add_loc (value loc, value incr)
+{
+	return caml_atomic_fetch_add_field(Field(loc, 0), Long_val(Field(loc, 1)), incr);
 }
 
 CAMLexport void caml_set_fields (value obj, value v)

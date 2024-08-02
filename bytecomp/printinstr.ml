@@ -113,6 +113,7 @@ let instruction ppf = function
   | Katomicsetfield fld -> fprintf ppf "\tatomicsetfield %i" fld
   | Katomicexchangefield fld -> fprintf ppf "\tatomicexchangefield %i" fld
   | Katomiccasfield fld -> fprintf ppf "\tatomiccasfield %i" fld
+  | Katomicfetchaddfield fld -> fprintf ppf "\tatomicfetchaddfield %i" fld
 
 let rec instruction_list ppf = function
     [] -> ()

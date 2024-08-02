@@ -47,6 +47,7 @@ CAMLextern value caml_atomic_load_field (value, intnat);
 CAMLextern value caml_atomic_exchange_field (value, intnat, value);
 CAMLextern void caml_atomic_store_field (value, intnat, value);
 CAMLextern value caml_atomic_cas_field (value, intnat, value, value);
+CAMLextern value caml_atomic_fetch_add_field (value, intnat, value);
 CAMLextern value caml_check_urgent_gc (value);
 
 /* [caml_stat_*] functions below provide an interface to the static memory

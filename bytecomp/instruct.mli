@@ -147,6 +147,7 @@ type instruction =
   | Katomicsetfield of int
   | Katomicexchangefield of int
   | Katomiccasfield of int
+  | Katomicfetchaddfield of int
 
 val immed_min: int
 val immed_max: int
