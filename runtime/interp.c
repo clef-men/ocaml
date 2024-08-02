@@ -1411,13 +1411,17 @@ do_resume: {
       goto check_stacks;
     }
 
-		Instruct(GETATOMICFIELD): {
+		Instruct(ATOMICGETFIELD): {
 			accu = caml_atomic_load_field(accu, *pc++);
 			Next;
 		}
-		Instruct(SETATOMICFIELD): {
+		Instruct(ATOMICSETFIELD): {
 			caml_atomic_store_field(accu, *pc++, *sp++);
 			accu = Val_unit;
+			Next;
+		}
+		Instruct(ATOMICEXCHANGEFIELD): {
+			accu = caml_atomic_exchange_field(accu, *pc++, *sp++);
 			Next;
 		}
 

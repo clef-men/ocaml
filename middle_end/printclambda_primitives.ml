@@ -222,6 +222,8 @@ let primitive ppf (prim:Clambda_primitives.primitive) =
   | Patomic_fetch_add -> fprintf ppf "atomic_fetch_add"
   | Patomic_load_field fld -> fprintf ppf "atomic_load_field %i" fld
   | Patomic_store_field fld -> fprintf ppf "atomic_store_field %i" fld
+  | Patomic_exchange_field fld -> fprintf ppf "atomic_exchange_field %i" fld
+  | Patomic_exchange_loc -> fprintf ppf "atomic_exchange_loc"
   | Popaque -> fprintf ppf "opaque"
   | Pdls_get -> fprintf ppf "dls_get"
   | Ppoll -> fprintf ppf "poll"

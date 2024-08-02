@@ -4386,7 +4386,7 @@ and type_expect_
           let[@warning "-8"] Texp_field (srecord, lid, label) = exp.exp_desc in
           if not label.lbl_atomic then
             raise (Error (label.lbl_loc, env, Not_an_atomic_field)) ;
-          let path = Path.Pdot (Pdot (Pident (Ident.create_persistent "Atomic"), "Loc"), "t") in
+          let path = Path.Pdot (Pdot (Pdot (Pident (Ident.create_persistent "Stdlib"), "Atomic"), "Loc"), "t") in
           rue {
             exp_desc = Texp_atomic_loc (srecord, lid, label);
             exp_loc = loc; exp_extra = [];

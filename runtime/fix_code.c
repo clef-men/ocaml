@@ -112,7 +112,7 @@ int* caml_init_opcode_nargs(void)
       l[CONSTINT] = l[PUSHCONSTINT] = l[OFFSETINT] =
       l[OFFSETREF] = l[OFFSETCLOSURE] = l[PUSHOFFSETCLOSURE] =
       l[RESUMETERM] = l[REPERFORMTERM] =
-			l[GETATOMICFIELD] = 1;
+			l[ATOMICGETFIELD] = l[ATOMICSETFIELD] = l[ATOMICEXCHANGEFIELD] = 1;
 
     /* Instructions with two operands */
     l[APPTERM] = l[CLOSURE] = l[PUSHGETGLOBALFIELD] =

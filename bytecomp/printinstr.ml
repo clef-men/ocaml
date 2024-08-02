@@ -109,8 +109,9 @@ let instruction ppf = function
                          ev.ev_loc.Location.loc_start.Lexing.pos_fname
                          ev.ev_loc.Location.loc_start.Lexing.pos_cnum
                          ev.ev_loc.Location.loc_end.Lexing.pos_cnum
-  | Kgetatomicfield fld -> fprintf ppf "\tgetatomicfield %i" fld
-  | Ksetatomicfield fld -> fprintf ppf "\tsetatomicfield %i" fld
+  | Katomicgetfield fld -> fprintf ppf "\tatomicgetfield %i" fld
+  | Katomicsetfield fld -> fprintf ppf "\tatomicsetfield %i" fld
+  | Katomicexchangefield fld -> fprintf ppf "\tatomicexchangefield %i" fld
 
 let rec instruction_list ppf = function
     [] -> ()

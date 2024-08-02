@@ -332,8 +332,9 @@ let emit_instr = function
   | Kresumeterm n -> out opRESUMETERM; out_int n
   | Kreperformterm n -> out opREPERFORMTERM; out_int n
   | Kstop -> out opSTOP
-  | Kgetatomicfield fld -> out opGETATOMICFIELD; out_int fld
-  | Ksetatomicfield fld -> out opSETATOMICFIELD; out_int fld
+  | Katomicgetfield fld -> out opATOMICGETFIELD; out_int fld
+  | Katomicsetfield fld -> out opATOMICSETFIELD; out_int fld
+  | Katomicexchangefield fld -> out opATOMICEXCHANGEFIELD; out_int fld
 
 (* Emission of a list of instructions. Include some peephole optimization. *)
 

@@ -397,8 +397,9 @@ let op_shapes = [
   opBREAK, Nothing;
   opRERAISE, Nothing;
   opRAISE_NOTRACE, Nothing;
-  opGETATOMICFIELD, Uint;
-  opSETATOMICFIELD, Uint;
+  opATOMICGETFIELD, Uint;
+  opATOMICSETFIELD, Uint;
+  opATOMICEXCHANGEFIELD, Uint;
 ]
 
 let print_event ev =

@@ -348,6 +348,10 @@ CAMLprim value caml_atomic_exchange (value obj, value v)
 {
 	return caml_atomic_exchange_field(obj, 0, v);
 }
+CAMLprim value caml_atomic_exchange_loc (value loc, value v)
+{
+	return caml_atomic_exchange_field(Field(loc, 0), Long_val(Field(loc, 1)), v);
+}
 
 CAMLexport void caml_atomic_store_field (value obj, intnat field, value v)
 {
