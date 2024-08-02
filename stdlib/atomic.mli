@@ -16,7 +16,12 @@
 (**************************************************************************)
 
 module Loc : sig
-  type 'a t
+  type 'a t =
+    'a atomic_loc
+
+  val exchange : 'a t -> 'a -> 'a
+  val compare_and_set : 'a t -> 'a -> 'a -> bool
+  val fetch_and_add : int t -> int -> int
 end
 
 (** Atomic references.

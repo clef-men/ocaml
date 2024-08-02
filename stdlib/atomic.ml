@@ -13,7 +13,12 @@
 (**************************************************************************)
 
 module Loc = struct
-  type 'a t
+  type 'a t =
+    'a atomic_loc
+
+  external exchange : 'a t -> 'a -> 'a = "%atomic_exchange_loc"
+  external compare_and_set : 'a t -> 'a -> 'a -> bool = "%atomic_cas_loc"
+  external fetch_and_add : int t -> int -> int = "%atomic_fetch_add_loc"
 end
 
 type !'a t
