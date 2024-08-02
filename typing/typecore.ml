@@ -4388,11 +4388,10 @@ and type_expect_
             raise (Error (label.lbl_loc, env, Label_not_mutable lid.txt)) ;
           if not label.lbl_atomic then
             raise (Error (label.lbl_loc, env, Label_not_atomic lid.txt)) ;
-          let path = Path.Pdot (Pdot (Pdot (Pident (Ident.create_persistent "Stdlib"), "Atomic"), "Loc"), "t") in
           rue {
             exp_desc = Texp_atomic_loc (srecord, lid, label);
             exp_loc = loc; exp_extra = [];
-            exp_type = newgenty (Tconstr (path, [exp.exp_type], ref Mnil));
+            exp_type = Predef.type_atomic_loc exp.exp_type;
             exp_attributes = sexp.pexp_attributes;
             exp_env = env }
       | _ ->
