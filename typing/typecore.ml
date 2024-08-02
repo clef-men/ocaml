@@ -188,7 +188,7 @@ type error =
   | Invalid_extension_constructor_payload
   | Not_an_extension_constructor
   | Invalid_atomic_loc_payload
-  | Not_an_atomic_field
+  | Label_not_atomic of Longident.t
   | Literal_overflow of string
   | Unknown_literal of string * char
   | Illegal_letrec_pat
@@ -4384,8 +4384,10 @@ and type_expect_
       | PStr [{ pstr_desc = Pstr_eval ({ pexp_desc = Pexp_field _; _ } as exp, _) }] ->
           let exp = type_exp env exp in
           let[@warning "-8"] Texp_field (srecord, lid, label) = exp.exp_desc in
+          if label.lbl_mut <> Mutable then
+            raise (Error (label.lbl_loc, env, Label_not_mutable lid.txt)) ;
           if not label.lbl_atomic then
-            raise (Error (label.lbl_loc, env, Not_an_atomic_field)) ;
+            raise (Error (label.lbl_loc, env, Label_not_atomic lid.txt)) ;
           let path = Path.Pdot (Pdot (Pdot (Pident (Ident.create_persistent "Stdlib"), "Atomic"), "Loc"), "t") in
           rue {
             exp_desc = Texp_atomic_loc (srecord, lid, label);
@@ -6990,9 +6992,9 @@ let report_error ~loc env = function
       Location.errorf ~loc
         "Invalid %a payload, a record field access is expected."
         Style.inline_code "[%atomic.loc]"
-  | Not_an_atomic_field ->
-      Location.errorf ~loc
-        "This record field is not atomic."
+  | Label_not_atomic lid ->
+      Location.errorf ~loc "The record field %a is not atomic"
+        (Style.as_inline_code longident) lid
   | Literal_overflow ty ->
       Location.errorf ~loc
         "Integer literal exceeds the range of representable integers of type %a"
