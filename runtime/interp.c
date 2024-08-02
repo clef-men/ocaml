@@ -1424,6 +1424,12 @@ do_resume: {
 			accu = caml_atomic_exchange_field(accu, *pc++, *sp++);
 			Next;
 		}
+		Instruct(ATOMICCASFIELD): {
+			value oldv = *sp++;
+			value newv = *sp++;
+			accu = caml_atomic_cas_field(accu, *pc++, oldv, newv);
+			Next;
+		}
 
 #ifndef THREADED_CODE
     default:

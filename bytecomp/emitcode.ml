@@ -335,6 +335,7 @@ let emit_instr = function
   | Katomicgetfield fld -> out opATOMICGETFIELD; out_int fld
   | Katomicsetfield fld -> out opATOMICSETFIELD; out_int fld
   | Katomicexchangefield fld -> out opATOMICEXCHANGEFIELD; out_int fld
+  | Katomiccasfield fld -> out opATOMICCASFIELD; out_int fld
 
 (* Emission of a list of instructions. Include some peephole optimization. *)
 

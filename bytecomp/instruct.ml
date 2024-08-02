@@ -122,6 +122,7 @@ type instruction =
   | Katomicgetfield of int
   | Katomicsetfield of int
   | Katomicexchangefield of int
+  | Katomiccasfield of int
 
 let immed_min = -0x40000000
 and immed_max = 0x3FFFFFFF

@@ -362,54 +362,38 @@ CAMLprim void caml_atomic_store (value obj, value v)
 	caml_atomic_store_field(obj, 0, v);
 }
 
-CAMLexport int caml_atomic_cas_field (
-  value obj, intnat field, value oldval, value newval)
+CAMLexport value caml_atomic_cas_field (value obj, intnat field, value oldv, value newv)
 {
   if (caml_domain_alone()) {
     /* non-atomic CAS since only this thread can access the object */
     volatile value* p = &Field(obj, field);
-    if (*p == oldval) {
-      *p = newval;
-      write_barrier(obj, field, oldval, newval);
-      return 1;
+    if (*p == oldv) {
+      *p = newv;
+      write_barrier(obj, field, oldv, newv);
+      return Val_true;
     } else {
-      return 0;
+      return Val_false;
     }
   } else {
     /* need a real CAS */
     atomic_value* p = &Op_atomic_val(obj)[field];
-    int cas_ret = atomic_compare_exchange_strong(p, &oldval, newval);
-    atomic_thread_fence(memory_order_release); /* generates `dmb ish` on Arm64*/
-    if (cas_ret) {
-      write_barrier(obj, field, oldval, newval);
-      return 1;
-    } else {
-      return 0;
-    }
-  }
-}
-CAMLprim value caml_atomic_cas (value ref, value oldv, value newv)
-{
-  if (caml_domain_alone()) {
-    value* p = Op_val(ref);
-    if (*p == oldv) {
-      *p = newv;
-      write_barrier(ref, 0, oldv, newv);
-      return Val_int(1);
-    } else {
-      return Val_int(0);
-    }
-  } else {
-    atomic_value* p = &Op_atomic_val(ref)[0];
     int cas_ret = atomic_compare_exchange_strong(p, &oldv, newv);
     atomic_thread_fence(memory_order_release); /* generates `dmb ish` on Arm64*/
     if (cas_ret) {
-      write_barrier(ref, 0, oldv, newv);
-      return Val_int(1);
+      write_barrier(obj, field, oldv, newv);
+      return Val_true;
     } else {
-      return Val_int(0);
+      return Val_false;
     }
   }
+}
+CAMLprim value caml_atomic_cas (value obj, value oldv, value newv)
+{
+	return caml_atomic_cas_field(obj, 0, oldv, newv);
+}
+CAMLprim value caml_atomic_cas_loc (value loc, value oldv, value newv)
+{
+	return caml_atomic_cas_field(Field(loc, 0), Long_val(Field(loc, 1)), oldv, newv);
 }
 
 CAMLprim value caml_atomic_fetch_add (value ref, value incr)
