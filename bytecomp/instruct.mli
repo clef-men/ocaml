@@ -142,12 +142,12 @@ type instruction =
   | Kresume
   | Kresumeterm of int
   | Kreperformterm of int
-  | Kstop
   | Katomicgetfield of int
   | Katomicsetfield of int
   | Katomicexchangefield of int
   | Katomiccasfield of int
   | Katomicfetchaddfield of int
+  | Kstop
 
 val immed_min: int
 val immed_max: int

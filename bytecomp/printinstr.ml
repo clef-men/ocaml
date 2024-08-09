@@ -104,7 +104,6 @@ let instruction ppf = function
   | Kresume -> fprintf ppf "\tresume"
   | Kresumeterm n -> fprintf ppf "\tresumeterm %i" n
   | Kreperformterm n -> fprintf ppf "\treperformterm %i" n
-  | Kstop -> fprintf ppf "\tstop"
   | Kevent ev -> fprintf ppf "\tevent \"%s\" %i-%i"
                          ev.ev_loc.Location.loc_start.Lexing.pos_fname
                          ev.ev_loc.Location.loc_start.Lexing.pos_cnum
@@ -114,6 +113,7 @@ let instruction ppf = function
   | Katomicexchangefield fld -> fprintf ppf "\tatomicexchangefield %i" fld
   | Katomiccasfield fld -> fprintf ppf "\tatomiccasfield %i" fld
   | Katomicfetchaddfield fld -> fprintf ppf "\tatomicfetchaddfield %i" fld
+  | Kstop -> fprintf ppf "\tstop"
 
 let rec instruction_list ppf = function
     [] -> ()

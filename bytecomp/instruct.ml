@@ -118,12 +118,12 @@ type instruction =
   | Kresume
   | Kresumeterm of int
   | Kreperformterm of int
-  | Kstop
   | Katomicgetfield of int
   | Katomicsetfield of int
   | Katomicexchangefield of int
   | Katomiccasfield of int
   | Katomicfetchaddfield of int
+  | Kstop
 
 let immed_min = -0x40000000
 and immed_max = 0x3FFFFFFF
