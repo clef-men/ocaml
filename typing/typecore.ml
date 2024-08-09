@@ -3840,11 +3840,7 @@ and type_expect_
         exp_attributes = sexp.pexp_attributes;
         exp_env = env }
   | Pexp_field(srecord, lid) ->
-      let (record, label, _) =
-        type_label_access env srecord Env.Projection lid
-      in
-      let (_, ty_arg, ty_res) = instance_label ~fixed:false label in
-      unify_exp ~sexp env record ty_res;
+      let record, label, ty_arg = solve_Pexp_field ~label_usage:Env.Projection env sexp srecord lid in
       rue {
         exp_desc = Texp_field(record, lid, label);
         exp_loc = loc; exp_extra = [];
@@ -4381,17 +4377,16 @@ and type_expect_
                              |"atomic.loc"); _ },
                     payload) ->
       begin match payload with
-      | PStr [{ pstr_desc = Pstr_eval ({ pexp_desc = Pexp_field _; _ } as exp, _) }] ->
-          let exp = type_exp env exp in
-          let[@warning "-8"] Texp_field (srecord, lid, label) = exp.exp_desc in
+      | PStr [{ pstr_desc = Pstr_eval ({ pexp_desc = Pexp_field (srecord, lid); _ } as sexp, _) }] ->
+          let record, label, ty_arg = solve_Pexp_field ~label_usage:Env.Mutation env sexp srecord lid in
           if label.lbl_mut <> Mutable then
             raise (Error (label.lbl_loc, env, Label_not_mutable lid.txt)) ;
           if not label.lbl_atomic then
             raise (Error (label.lbl_loc, env, Label_not_atomic lid.txt)) ;
           rue {
-            exp_desc = Texp_atomic_loc (srecord, lid, label);
+            exp_desc = Texp_atomic_loc (record, lid, label);
             exp_loc = loc; exp_extra = [];
-            exp_type = Predef.type_atomic_loc exp.exp_type;
+            exp_type = instance (Predef.type_atomic_loc ty_arg);
             exp_attributes = sexp.pexp_attributes;
             exp_env = env }
       | _ ->
@@ -4901,6 +4896,14 @@ and type_label_access env srecord usage lid =
     wrap_disambiguate "This expression has" (mk_expected ty_exp)
       (Label.disambiguate usage lid env expected_type) labels in
   (record, label, expected_type)
+
+and solve_Pexp_field ~label_usage env sexp srecord lid =
+  let (record, label, _) =
+    type_label_access env srecord label_usage lid
+  in
+  let (_, ty_arg, ty_res) = instance_label ~fixed:false label in
+  unify_exp ~sexp env record ty_res;
+  (record, label, ty_arg)
 
 (* Typing format strings for printing or reading.
    These formats are used by functions in modules Printf, Format, and Scanf.
