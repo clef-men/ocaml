@@ -241,6 +241,10 @@ let classify_expression : Typedtree.expression -> sd =
     | Texp_override _
     | Texp_letop _ ->
         Dynamic
+
+    | Texp_atomic_loc _ ->
+        (* TODOclement *)
+        assert false
   and classify_value_bindings rec_flag env bindings =
     (* We use a non-recursive classification, classifying each
         binding with respect to the old environment
@@ -788,6 +792,9 @@ let rec expression : Typedtree.expression -> term_judg =
       join [
         expression e1 << Dereference
       ]
+    | Texp_atomic_loc _ ->
+        (* TODOclement *)
+        assert false
     | Texp_field (e, _, _) ->
       (*
         G |- e: m[Dereference]
