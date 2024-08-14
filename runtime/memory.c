@@ -364,17 +364,18 @@ CAMLprim value caml_atomic_exchange_loc (value loc, value v)
   );
 }
 
-CAMLprim void caml_atomic_store_field (value obj, intnat field, value v)
+CAMLprim value caml_atomic_store_field (value obj, intnat field, value v)
 {
   caml_atomic_exchange_field(obj, field, v);
+  return Val_unit;
 }
-CAMLprim void caml_atomic_store (value obj, value v)
+CAMLprim value caml_atomic_store (value obj, value v)
 {
-  caml_atomic_store_field(obj, 0, v);
+  return caml_atomic_store_field(obj, 0, v);
 }
-CAMLprim void caml_atomic_store_loc (value loc, value v)
+CAMLprim value caml_atomic_store_loc (value loc, value v)
 {
-  caml_atomic_store_field(
+  return caml_atomic_store_field(
     Field(loc, 0),
     Long_val(Field(loc, 1)),
     v
