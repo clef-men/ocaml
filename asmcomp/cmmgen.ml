@@ -841,8 +841,12 @@ and transl_prim_1 env p arg dbg =
   | Patomic_load {immediate_or_pointer = Pointer} ->
       Cop(mk_load_atomic Word_val, [transl env arg], dbg)
   | Patomic_load_loc ->
-      let arg = transl env arg in
-      Cop(Cextcall("caml_atomic_load_loc", typ_val, [], false), [arg], dbg)
+      let suff, args = decompose_atomic_loc env dbg arg in
+      Cop (
+        Cextcall("caml_atomic_load" ^ suff, typ_val, [], false),
+        args,
+        dbg
+      )
   | Ppoll ->
     (Csequence (remove_unit (transl env arg),
                 return_unit dbg (Cop(Cpoll, [], dbg))))
@@ -1040,11 +1044,21 @@ and transl_prim_2 env p arg1 arg2 dbg =
      Cop (Cextcall ("caml_atomic_fetch_add", typ_int, [], false),
           [transl env arg1; transl env arg2], dbg)
   | Patomic_exchange_loc ->
-     Cop (Cextcall ("caml_atomic_exchange_loc", typ_val, [], false),
-          [transl env arg1; transl env arg2], dbg)
+      let suff, args = decompose_atomic_loc env dbg arg1 in
+      let arg2 = transl env arg2 in
+      Cop (
+        Cextcall("caml_atomic_exchange" ^ suff, typ_val, [], false),
+        args @ [arg2],
+        dbg
+      )
   | Patomic_fetch_add_loc ->
-     Cop (Cextcall ("caml_atomic_fetch_add_loc", typ_int, [], false),
-          [transl env arg1; transl env arg2], dbg)
+      let suff, args = decompose_atomic_loc env dbg arg1 in
+      let arg2 = transl env arg2 in
+      Cop (
+        Cextcall("caml_atomic_fetch_add" ^ suff, typ_int, [], false),
+        args @ [arg2],
+        dbg
+      )
   | Prunstack | Pperform | Presume | Preperform | Pdls_get
   | Patomic_load _ | Patomic_cas
   | Patomic_load_loc | Patomic_cas_loc
@@ -1103,8 +1117,14 @@ and transl_prim_3 env p arg1 arg2 arg3 dbg =
      Cop (Cextcall ("caml_atomic_cas", typ_int, [], false),
           [transl env arg1; transl env arg2; transl env arg3], dbg)
   | Patomic_cas_loc ->
-     Cop (Cextcall ("caml_atomic_cas_loc", typ_int, [], false),
-          [transl env arg1; transl env arg2; transl env arg3], dbg)
+      let suff, args = decompose_atomic_loc env dbg arg1 in
+      let arg2 = transl env arg2 in
+      let arg3 = transl env arg3 in
+      Cop (
+        Cextcall("caml_atomic_cas" ^ suff, typ_int, [], false),
+        args @ [arg2; arg3],
+        dbg
+      )
 
   (* Effects *)
 
@@ -1395,6 +1415,16 @@ and transl_switch dbg env arg index cases = match Array.length cases with
 | _ ->
     let cases = Array.map (transl env) cases in
     transl_switch_clambda dbg arg index cases
+
+and decompose_atomic_loc env dbg arg =
+  match arg with
+  | Uprim (Pmakeblock _, [obj; Uconst (Uconst_int fld)], _) ->
+      let obj = transl env obj in
+      let fld = Cconst_int (fld, dbg) in
+      "_field", [obj; fld]
+  | _ ->
+      let arg = transl env arg in
+      "_loc", [arg]
 
 
 (* Translate a function definition *)
