@@ -24,6 +24,8 @@ open Typetexp
 
 module String = Misc.Stdlib.String
 
+module Style = Misc.Style
+
 type native_repr_kind = Unboxed | Untagged
 
 (* Our static analyses explore the set of type expressions "reachable"
@@ -362,7 +364,12 @@ let transl_declaration env sdecl (id, uid) =
         | [] -> bad "it has no fields"
         | _::_::_ -> bad "it has more than one field"
         | [{pld_mutable = Mutable}] -> bad "it is mutable"
-        | [{pld_mutable = Immutable}] -> ()
+        | [{pld_name= name; pld_mutable = Immutable; pld_attributes = attrs}] ->
+            if Builtin_attributes.has_atomic attrs then
+              bad (
+                Format_doc.asprintf "field %a is atomic"
+                  Style.inline_code name.txt
+              )
       end
     | Ptype_variant constructors -> begin match constructors with
         | [] -> bad "it has no constructor"
@@ -1883,7 +1890,6 @@ let check_recmod_typedecl env loc recmod_ids path decl =
 (**** Error report ****)
 
 open Format_doc
-module Style = Misc.Style
 
 let explain_unbound_gen ppf tv tl typ kwd pr =
   try
