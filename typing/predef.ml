@@ -248,7 +248,7 @@ let build_initial_env add_type add_extension empty_env =
   |> add_type ident_float
   |> add_type ident_floatarray
   |> add_type1 ident_atomic_loc
-       ~variance:Variance.unknown
+       ~variance:Variance.covariant
        ~separability:Separability.Ind
   |> add_type ident_int ~immediate:Always
   |> add_type ident_int32
