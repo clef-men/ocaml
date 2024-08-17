@@ -24,8 +24,6 @@ open Typetexp
 
 module String = Misc.Stdlib.String
 
-module Style = Misc.Style
-
 type native_repr_kind = Unboxed | Untagged
 
 (* Our static analyses explore the set of type expressions "reachable"
@@ -77,6 +75,7 @@ type error =
   | Boxed_and_unboxed
   | Nonrec_gadt
   | Invalid_private_row_declaration of type_expr
+  | Atomic_field_in_float_record
 
 open Typedtree
 
@@ -364,12 +363,9 @@ let transl_declaration env sdecl (id, uid) =
         | [] -> bad "it has no fields"
         | _::_::_ -> bad "it has more than one field"
         | [{pld_mutable = Mutable}] -> bad "it is mutable"
-        | [{pld_name= name; pld_mutable = Immutable; pld_attributes = attrs}] ->
+        | [{pld_mutable = Immutable; pld_attributes = attrs}] ->
             if Builtin_attributes.has_atomic attrs then
-              bad (
-                Format_doc.asprintf "field %a is atomic"
-                  Style.inline_code name.txt
-              )
+              bad "it has an atomic field"
       end
     | Ptype_variant constructors -> begin match constructors with
         | [] -> bad "it has no constructor"
@@ -458,10 +454,18 @@ let transl_declaration env sdecl (id, uid) =
       | Ptype_record lbls ->
           let lbls, lbls' = transl_labels env None true lbls in
           let rep =
-            if unbox then Record_unboxed false
-            else if List.for_all (fun l -> is_float env l.Types.ld_type) lbls'
-            then Record_float
-            else Record_regular
+            if unbox then (
+              Record_unboxed false
+            ) else if
+              List.for_all (fun l -> is_float env l.Types.ld_type) lbls'
+            then (
+              if List.exists (fun l -> l.ld_atomic) lbls then
+                raise (Error (sdecl.ptype_loc, Atomic_field_in_float_record))
+              else
+                Record_float
+            ) else (
+              Record_regular
+            )
           in
           Ttype_record lbls, Type_record(lbls', rep)
       | Ptype_open -> Ttype_open, Type_open
@@ -1890,6 +1894,7 @@ let check_recmod_typedecl env loc recmod_ids path decl =
 (**** Error report ****)
 
 open Format_doc
+module Style = Misc.Style
 
 let explain_unbound_gen ppf tv tl typ kwd pr =
   try
@@ -2262,6 +2267,8 @@ let report_error_doc ppf = function
          write explicitly@]@;<1 2>%a@]"
         (Style.as_inline_code Printtyp.type_expr) ty
         (Style.as_inline_code pp_private) ty
+  | Atomic_field_in_float_record ->
+      fprintf ppf "@[Float record fields cannot be atomic@]"
 
 let () =
   Location.register_error_of_exn

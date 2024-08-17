@@ -353,7 +353,8 @@ and transl_exp0 ~in_new_scope ~scopes e =
         Lprim (Patomic_load_loc, [atomic_loc], loc)
       | Record_unboxed _ ->
         fatal_error "Translcore.transl_exp0: atomic field in unboxed record"
-      | Record_float
+      | Record_float ->
+        fatal_error "Translcore.transl_exp0: atomic field in float record"
       | Record_extension _ ->
         (* TODOclement *)
         assert false
@@ -387,7 +388,8 @@ and transl_exp0 ~in_new_scope ~scopes e =
         )
       | Record_unboxed _ ->
           fatal_error "Translcore.transl_exp0: atomic field in unboxed record"
-      | Record_float
+      | Record_float ->
+        fatal_error "Translcore.transl_exp0: atomic field in float record"
       | Record_extension _ ->
         (* TODOclement *)
         assert false
