@@ -75,7 +75,6 @@ type error =
   | Boxed_and_unboxed
   | Nonrec_gadt
   | Invalid_private_row_declaration of type_expr
-  | Atomic_field_in_float_record
 
 open Typedtree
 
@@ -457,15 +456,13 @@ let transl_declaration env sdecl (id, uid) =
             if unbox then (
               Record_unboxed false
             ) else if
-              List.for_all (fun l -> is_float env l.Types.ld_type) lbls'
-            then (
-              if List.exists (fun l -> l.ld_atomic) lbls then
-                raise (Error (sdecl.ptype_loc, Atomic_field_in_float_record))
-              else
-                Record_float
-            ) else (
+              List.for_all (fun (l : Types.label_declaration) ->
+                is_float env l.ld_type && not l.ld_atomic
+              ) lbls'
+            then
+              Record_float
+            else
               Record_regular
-            )
           in
           Ttype_record lbls, Type_record(lbls', rep)
       | Ptype_open -> Ttype_open, Type_open
@@ -2267,8 +2264,6 @@ let report_error_doc ppf = function
          write explicitly@]@;<1 2>%a@]"
         (Style.as_inline_code Printtyp.type_expr) ty
         (Style.as_inline_code pp_private) ty
-  | Atomic_field_in_float_record ->
-      fprintf ppf "@[Float record fields cannot be atomic@]"
 
 let () =
   Location.register_error_of_exn

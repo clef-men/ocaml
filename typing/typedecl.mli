@@ -106,7 +106,6 @@ type error =
   | Boxed_and_unboxed
   | Nonrec_gadt
   | Invalid_private_row_declaration of type_expr
-  | Atomic_field_in_float_record
 
 exception Error of Location.t * error
 
