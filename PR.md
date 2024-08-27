@@ -12,7 +12,7 @@ let add_new_reader v =
   Atomic.Loc.incr [%atomic.loc v.readers]
 ```
 
-This PR is implemented by myself (@clef-men) with help from @gasche.
+This PR is implemented by myself (@clef-men) with help from @gasche, including for this PR description.
 
 It is ready for review. We did our best to have a clean git history, so reading the PR commit-by-commit is recommended.
 
@@ -37,7 +37,7 @@ proposed by @bclement-ocp.
 
 We implement two features in sequence, as described in the RFC.
 
-First, atomic record fields are just record fields marked with an `[@atomic]` attribute. Reads and writes to these fields are compiled to atomic operations. In our example, the field `readers` is marked atomic, to `v.readers` and `v.readers <- 42` will be compiled to atomic an read and an atomic write.
+First, atomic record fields are just record fields marked with an `[@atomic]` attribute. Reads and writes to these fields are compiled to atomic operations. In our example, the field `readers` is marked atomic, to `v.readers` and `v.readers <- 42` will be compiled to an atomic read and an atomic write.
 
 Second, we implement "atomic locations", which is a compiler-supported way to describe an atomic field within a record to perform other atomic operations than read and write. Continuing this example, `[%atomic.loc v.readers]` has type `int Atomic.Loc.t`, which indicates an atomic location of type `int`. The submodule `Atomic.Loc` exposes operations similar to `Atomic`, but on this new type `Atomic.Loc.t`.
 
@@ -56,7 +56,7 @@ Currently the only atomic locations supported are atomic record fields. In the f
 
    (The old functions are kept around for backward-compatibility reasons, redefined from the new ones with offset `0`.)
 
-- Internally, a value of type `'a Atomic.Loc.t` is a pair of a block and an offset inside the block. With example above, `[%atomic.loc v.readers]` is the pair `(v, 1)`, indicating the second field of the record `v`. The call `Atomic.Loc.exchange [%atomic.loc v.readers] x` gets rewritten to something like `%atomic_exchange_field v 1 x`, which will eventually become the C call `caml_atomic_exchange_field(v, Val_long(1), x)`. (When an atomic primitive is directly applied to an `[%atomic.loc ...]` expression, the compiler eliminates the pair construction on the fly. If it is passed around as a first-class location, then the pair may be constructed.)
+- Internally, a value of type `'a Atomic.Loc.t` is a pair of a block and an offset inside the block. With the example above, `[%atomic.loc v.readers]` is the pair `(v, 1)`, indicating the second field of the record `v`. The call `Atomic.Loc.exchange [%atomic.loc v.readers] x` gets rewritten to something like `%atomic_exchange_field v 1 x`, which will eventually become the C call `caml_atomic_exchange_field(v, Val_long(1), x)`. (When an atomic primitive is directly applied to an `[%atomic.loc ...]` expression, the compiler eliminates the pair construction on the fly. If it is passed around as a first-class location, then the pair may be constructed.)
 
 - We reimplement the `Atomic.t` type as a record with a single atomic field, and the corresponding functions become calls to the `Atomic.Loc.t` primitives, with offset `0`.
 
