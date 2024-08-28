@@ -24,7 +24,8 @@ let cas (r : 'a atomic) oldv newv =
 
 (* TEST
    not-windows; (* MSVC uses a different symbol separator *)
-   no-flambda; (* the output will be slightly different under flambda, meh. *)
+   no-flambda; (* the output will be slightly different under Flambda *)
+   no-tsan; (* TSan modifies the generated code *)
    setup-ocamlopt.byte-build-env;
    flags = "-c -dcmm -dno-locations -dno-unique-ids";
    ocamlopt.byte;
