@@ -191,5 +191,3 @@ module Float_records :
     val get : t -> float
   end
 |}];;
-
-
