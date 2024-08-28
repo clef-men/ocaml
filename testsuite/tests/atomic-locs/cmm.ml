@@ -23,6 +23,7 @@ let cas (r : 'a atomic) oldv newv =
   Atomic.Loc.compare_and_set [%atomic.loc r.x] oldv newv
 
 (* TEST
+   not-windows; (* MSVC uses a different symbol separator *)
    no-flambda; (* the output will be slightly different under flambda, meh. *)
    setup-ocamlopt.byte-build-env;
    flags = "-c -dcmm -dno-locations -dno-unique-ids";
