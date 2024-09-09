@@ -439,7 +439,6 @@ module Analyser =
          ld_atomic=is_atomic;
          ld_type=type_expr;
          ld_attributes} =
-      assert (not is_atomic);
       let field_name = Ident.name field_name in
       let comment_opt =
         try List.assoc field_name name_comment_list
@@ -449,6 +448,7 @@ module Analyser =
       {
         rf_name = field_name ;
         rf_mutable = mutable_flag = Mutable ;
+        rf_atomic = is_atomic ;
         rf_type = Odoc_env.subst_type env type_expr ;
         rf_text = comment_opt
       }
