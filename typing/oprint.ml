@@ -392,7 +392,7 @@ and print_out_label ppf {olab_name; olab_mut; olab_atomic; olab_type} =
      | Immutable -> "")
     print_lident olab_name
     print_out_type olab_type
-    (if olab_atomic then " [@atomic]" else "")
+    (match olab_atomic with Atomic -> " [@atomic]" | Nonatomic -> "")
 
 let out_label = ref print_out_label
 

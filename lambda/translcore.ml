@@ -330,7 +330,7 @@ and transl_exp0 ~in_new_scope ~scopes e =
       let (arg, lbl) = transl_atomic_loc ~scopes arg lbl in
       let loc = of_location ~scopes e.exp_loc in
       Lprim (Pmakeblock (0, Immutable, shape), [arg; lbl], loc)
-  | Texp_field (arg, _, lbl) when lbl.lbl_atomic ->
+  | Texp_field (arg, _, lbl) when lbl.lbl_atomic = Atomic ->
       let arg, lbl = transl_atomic_loc ~scopes arg lbl in
       let loc = of_location ~scopes e.exp_loc in
       Lprim (Patomic_load, [arg; lbl], loc)
@@ -348,7 +348,7 @@ and transl_exp0 ~in_new_scope ~scopes e =
           Lprim (Pfield (lbl.lbl_pos + 1, maybe_pointer e, lbl.lbl_mut), [targ],
                  of_location ~scopes e.exp_loc)
       end
-  | Texp_setfield (arg, _, lbl, newval) when lbl.lbl_atomic ->
+  | Texp_setfield (arg, _, lbl, newval) when lbl.lbl_atomic = Atomic ->
       let prim =
         Primitive.simple
           ~name:"caml_atomic_exchange_field" ~arity:3 ~alloc:false

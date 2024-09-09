@@ -238,7 +238,7 @@ let transl_labels env univars closed lbls =
           ld_name = name;
           ld_uid = Uid.mk ~current_unit:(Env.get_current_unit ());
           ld_mutable = mut;
-          ld_atomic = is_atomic;
+          ld_atomic = if is_atomic then Atomic else Nonatomic;
           ld_type = cty; ld_loc = loc; ld_attributes = attrs}
       )
   in
@@ -462,7 +462,7 @@ let transl_declaration env sdecl (id, uid) =
               Record_unboxed false
             ) else if
               List.for_all (fun (l : Types.label_declaration) ->
-                is_float env l.ld_type && not l.ld_atomic
+                is_float env l.ld_type && l.ld_atomic = Nonatomic
               ) lbls'
             then
               Record_float

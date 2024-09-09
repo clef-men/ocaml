@@ -77,7 +77,9 @@ let fmt_mutable_flag f x =
   | Mutable -> fprintf f "Mutable"
 
 let fmt_atomic_flag f x =
-  pp_print_string f (if x then "Atomic" else "Nonatomic")
+  match x with
+  | Nonatomic -> fprintf f "Nonatomic"
+  | Atomic -> fprintf f "Atomic"
 
 let fmt_virtual_flag f x =
   match x with

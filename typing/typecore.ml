@@ -4388,7 +4388,7 @@ and type_expect_
           let record, label, ty_arg =
             solve_Pexp_field ~label_usage:Env.Mutation env sexp srecord lid
           in
-          if not label.lbl_atomic then
+          if label.lbl_atomic = Nonatomic then
             raise (Error (loc, env, Label_not_atomic lid.txt)) ;
           rue {
             exp_desc = Texp_atomic_loc (record, lid, label);

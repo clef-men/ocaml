@@ -436,7 +436,7 @@ module Analyser =
     let get_field env name_comment_list
         {Types.ld_id=field_name;
          ld_mutable=mutable_flag;
-         ld_atomic=is_atomic;
+         ld_atomic=atomic_flag;
          ld_type=type_expr;
          ld_attributes} =
       let field_name = Ident.name field_name in
@@ -448,7 +448,7 @@ module Analyser =
       {
         rf_name = field_name ;
         rf_mutable = mutable_flag = Mutable ;
-        rf_atomic = is_atomic ;
+        rf_atomic = atomic_flag = Atomic ;
         rf_type = Odoc_env.subst_type env type_expr ;
         rf_text = comment_opt
       }

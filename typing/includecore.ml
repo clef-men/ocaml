@@ -488,7 +488,11 @@ module Record_diffing = struct
       Some (Mutability  ord)
     else if ld1.ld_atomic <> ld2.ld_atomic
     then
-      let ord = if ld1.ld_atomic then First else Second in
+      let ord =
+        match ld1.ld_atomic with
+        | Atomic -> First
+        | Nonatomic -> Second
+      in
       Some (Atomicity  ord)
     else
     let tl1 = params1 @ [ld1.ld_type] in
