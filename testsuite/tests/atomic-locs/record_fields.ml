@@ -47,7 +47,7 @@ module Basic :
 
 
 (* Atomic fields must be mutable. *)
-module Error = struct
+module Error1 = struct
   type t = { x : int [@atomic] }
 end
 [%%expect{|
@@ -55,6 +55,32 @@ Line 2, characters 13-30:
 2 |   type t = { x : int [@atomic] }
                  ^^^^^^^^^^^^^^^^^
 Error: The label "x" must be mutable to be declared atomic.
+|}];;
+
+
+(* [%atomic.loc _] payload must be a record field access *)
+module Error2 = struct
+  type t = { mutable x : int [@atomic] }
+  let f t = [%atomic.loc t]
+end
+[%%expect{|
+Line 3, characters 12-27:
+3 |   let f t = [%atomic.loc t]
+                ^^^^^^^^^^^^^^^
+Error: Invalid "[%atomic.loc]" payload, a record field access is expected.
+|}];;
+
+
+(* [%atomic.loc _] only works on atomic fields *)
+module Error3 = struct
+  type t = { x : int }
+  let f t = [%atomic.loc t.x]
+end
+[%%expect{|
+Line 3, characters 12-29:
+3 |   let f t = [%atomic.loc t.x]
+                ^^^^^^^^^^^^^^^^^
+Error: The record field "x" is not atomic
 |}];;
 
 
@@ -121,7 +147,7 @@ end : sig
   type t = { mutable x : int [@atomic] }
 end)
 [%%expect{|
-(apply (field_mut 1 (global Toploop!)) "Ok/352" (makeblock 0))
+(apply (field_mut 1 (global Toploop!)) "Ok/362" (makeblock 0))
 module Ok : sig type t = { mutable x : int [@atomic]; } end
 |}];;
 
@@ -135,7 +161,7 @@ module Inline_record = struct
   let test : t -> int = fun (A r) -> r.x
 end
 [%%expect{|
-(apply (field_mut 1 (global Toploop!)) "Inline_record/360"
+(apply (field_mut 1 (global Toploop!)) "Inline_record/370"
   (let (test = (function param : int (atomic_load param 0)))
     (makeblock 0 test)))
 module Inline_record :
@@ -153,7 +179,7 @@ module Extension_with_inline_record = struct
     | _ -> 0
 end
 [%%expect{|
-(apply (field_mut 1 (global Toploop!)) "Extension_with_inline_record/368"
+(apply (field_mut 1 (global Toploop!)) "Extension_with_inline_record/378"
   (let
     (A =
        (makeblock 248 "Extension_with_inline_record.A" (caml_fresh_oo_id 0))
@@ -179,7 +205,7 @@ module Float_records = struct
   let get v = v.y
 end
 [%%expect{|
-(apply (field_mut 1 (global Toploop!)) "Float_records/380"
+(apply (field_mut 1 (global Toploop!)) "Float_records/390"
   (let
     (mk_t = (function x[float] y[float] (makemutable 0 (float,float) x y))
      get = (function v : float (atomic_load v 1)))
