@@ -35,7 +35,7 @@ type !'a t =
   }
 
 let make v =
-  { contents= v }
+  { contents = v }
 
 external make_contended : 'a -> 'a t = "caml_atomic_make_contended"
 
