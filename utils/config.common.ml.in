@@ -163,3 +163,9 @@ let config_var x =
       Some s
 
 let merlin = false
+
+let cache_line_size =
+  match architecture with
+  | "s390x" -> 256
+  | "arm64" | "power" -> 128
+  | _ -> 64
