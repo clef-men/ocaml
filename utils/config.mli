@@ -160,6 +160,9 @@ val architecture: string
 val model: string
 (** Name of processor submodel for the native-code compiler *)
 
+val cache_line_size: int
+(** Assumed size of cache line *)
+
 val system: string
 (** Name of operating system for the native-code compiler *)
 
