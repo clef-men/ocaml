@@ -59,6 +59,7 @@ let builtin_attrs =
   [ "alert"
   ; "atomic"
   ; "boxed"
+  ; "contended"
   ; "deprecated"
   ; "deprecated_mutable"
   ; "explicit_arity"
@@ -413,3 +414,5 @@ let has_unboxed attrs = has_attribute "unboxed" attrs
 let has_boxed attrs = has_attribute "boxed" attrs
 
 let has_atomic attrs = has_attribute "atomic" attrs
+
+let has_contended = has_attribute "contended"

@@ -24,6 +24,7 @@ type record_field = {
     rf_name : string ;
     rf_mutable : bool ; (** true if mutable *)
     rf_atomic : bool; (** true if atomic *)
+    rf_contended : bool; (** true if contended *)
     rf_type : Types.type_expr ;
     mutable rf_text : Odoc_types.info option ; (** optional user description *)
   }

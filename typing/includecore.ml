@@ -156,6 +156,7 @@ type label_mismatch =
   | Type of Errortrace.equality_error
   | Mutability of position
   | Atomicity of position
+  | Contendedness of position
 
 type record_change =
   (Types.label_declaration, Types.label_declaration, label_mismatch)
@@ -275,6 +276,10 @@ let report_label_mismatch first second env ppf err =
         (choose_other ord first second)
   | Atomicity ord ->
       Format_doc.fprintf ppf "%s is atomic and %s is not."
+        (String.capitalize_ascii (choose ord first second))
+        (choose_other ord first second)
+  | Contendedness ord ->
+      Format_doc.fprintf ppf "%s is contended and %s is not."
         (String.capitalize_ascii (choose ord first second))
         (choose_other ord first second)
 
@@ -485,15 +490,15 @@ module Record_diffing = struct
     if ld1.ld_mutable <> ld2.ld_mutable
     then
       let ord = if ld1.ld_mutable = Asttypes.Mutable then First else Second in
-      Some (Mutability  ord)
+      Some (Mutability ord)
     else if ld1.ld_atomic <> ld2.ld_atomic
     then
-      let ord =
-        match ld1.ld_atomic with
-        | Atomic -> First
-        | Nonatomic -> Second
-      in
-      Some (Atomicity  ord)
+      let ord = if ld1.ld_atomic = Atomic then First else Second in
+      Some (Atomicity ord)
+    else if ld1.ld_contended <> ld2.ld_contended
+    then
+      let ord = if ld1.ld_contended = Contended then First else Second in
+      Some (Contendedness ord)
     else
     let tl1 = params1 @ [ld1.ld_type] in
     let tl2 = params2 @ [ld2.ld_type] in

@@ -573,6 +573,7 @@ class man =
              bs b (r.rf_name^" : ");
              self#man_of_type_expr b father r.rf_type;
              bs b (if r.rf_atomic then "\n.B [@atomic] " else "");
+             bs b (if r.rf_contended then "\n.B [@contended] " else "");
              bs b ";";
              self#field_comment b r.rf_text ;
            ) l;
@@ -848,6 +849,7 @@ class man =
       bs b (f.rf_name^" : ");
       self#man_of_type_expr b modname f.rf_type;
       if f.rf_atomic then bs b "\n.B [@atomic] ";
+      if f.rf_contended then bs b "\n.B [@contended] ";
       bs b "\n.sp\n";
       self#man_of_info b f.rf_text;
       bs b "\n.sp\n"
