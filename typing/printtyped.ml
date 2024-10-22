@@ -81,6 +81,11 @@ let fmt_atomic_flag f x =
   | Nonatomic -> fprintf f "Nonatomic"
   | Atomic -> fprintf f "Atomic"
 
+let fmt_contended_flag f x =
+  match x with
+  | Noncontended -> fprintf f "Noncontended"
+  | Contended -> fprintf f "Contended"
+
 let fmt_virtual_flag f x =
   match x with
   | Virtual -> fprintf f "Virtual"
@@ -941,14 +946,14 @@ and constructor_arguments i ppf = function
   | Cstr_tuple l -> list i core_type ppf l
   | Cstr_record l -> list i label_decl ppf l
 
-and label_decl i ppf {ld_id; ld_name= _; ld_mutable; ld_atomic; ld_type; ld_loc;
-                      ld_attributes} =
-  line i ppf "%a\n" fmt_location ld_loc;
-  attributes i ppf ld_attributes;
-  line (i+1) ppf "%a\n" fmt_mutable_flag ld_mutable;
-  line (i+1) ppf "%a\n" fmt_atomic_flag ld_atomic;
-  line (i+1) ppf "%a" fmt_ident ld_id;
-  core_type (i+1) ppf ld_type
+and label_decl i ppf lbl =
+  line i ppf "%a\n" fmt_location lbl.ld_loc;
+  attributes i ppf lbl.ld_attributes;
+  line (i+1) ppf "%a\n" fmt_mutable_flag lbl.ld_mutable;
+  line (i+1) ppf "%a\n" fmt_atomic_flag lbl.ld_atomic;
+  line (i+1) ppf "%a\n" fmt_contended_flag lbl.ld_contended;
+  line (i+1) ppf "%a" fmt_ident lbl.ld_id;
+  core_type (i+1) ppf lbl.ld_type
 
 and longident_x_pattern i ppf (li, _, p) =
   line i ppf "%a\n" fmt_longident li;

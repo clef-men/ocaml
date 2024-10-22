@@ -433,25 +433,19 @@ module Analyser =
         Object_type (List.map f @@ fst @@ Ctype.flatten_fields fields)
       | _ -> Other (Odoc_env.subst_type env type_expr)
 
-    let get_field env name_comment_list
-        {Types.ld_id=field_name;
-         ld_mutable=mutable_flag;
-         ld_atomic=atomic_flag;
-         ld_type=type_expr;
-         ld_attributes} =
-      let field_name = Ident.name field_name in
-      let is_atomic =
-        match atomic_flag with Atomic -> true | Nonatomic -> false in
+    let get_field env name_comment_list lbl =
+      let field_name = Ident.name lbl.ld_id in
       let comment_opt =
         try List.assoc field_name name_comment_list
         with Not_found -> None
       in
-      let comment_opt = analyze_alerts comment_opt ld_attributes in
+      let comment_opt = analyze_alerts comment_opt lbl.ld_attributes in
       {
         rf_name = field_name ;
-        rf_mutable = mutable_flag = Mutable ;
-        rf_atomic = is_atomic ;
-        rf_type = Odoc_env.subst_type env type_expr ;
+        rf_mutable = lbl.ld_mutable = Mutable ;
+        rf_atomic = lbl.ld_atomic = Atomic ;
+        rf_contended = lbl.ld_contended = Contended ;
+        rf_type = Odoc_env.subst_type env lbl.ld_type ;
         rf_text = comment_opt
       }
 
@@ -499,11 +493,18 @@ module Analyser =
 
     let get_cstr_args env pos_end =
       let tuple ct = Odoc_env.subst_type env ct.Typedtree.ctyp_type in
-      let record comments
-          { Typedtree.ld_id; ld_mutable; ld_atomic; ld_type; ld_loc; ld_attributes } =
+      let record comments (lbl : Typedtree.label_declaration) =
         get_field env comments @@
-        {Types.ld_id; ld_mutable; ld_atomic; ld_type=ld_type.Typedtree.ctyp_type;
-         ld_loc; ld_attributes; ld_uid=Types.Uid.internal_not_actually_unique} in
+        { ld_id = lbl.ld_id ;
+          ld_mutable = lbl.ld_mutable ;
+          ld_atomic = lbl.ld_atomic ;
+          ld_contended = lbl.ld_contended ;
+          ld_type = lbl.ld_type.ctyp_type ;
+          ld_loc = lbl.ld_loc ;
+          ld_attributes = lbl.ld_attributes ;
+          ld_uid = Types.Uid.internal_not_actually_unique ;
+        }
+      in
       let open Typedtree in
       function
       | Cstr_tuple l ->

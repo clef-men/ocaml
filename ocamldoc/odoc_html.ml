@@ -1708,6 +1708,7 @@ class html =
         bp b "<span id=\"%s\">%s</span>&nbsp;: " (gen_name r) r.rf_name;
         self#html_of_type_expr b father r.rf_type;
         if r.rf_atomic then bs b (self#keyword " [@atomic]") ;
+        if r.rf_contended then bs b (self#keyword " [@contended]") ;
         bs b ";</code></td>\n";
         (
           match r.rf_text with

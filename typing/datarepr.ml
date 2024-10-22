@@ -180,7 +180,9 @@ let none =
 
 let dummy_label =
   { lbl_name = ""; lbl_res = none; lbl_arg = none;
-    lbl_mut = Immutable; lbl_atomic = Nonatomic;
+    lbl_mut = Immutable;
+    lbl_atomic = Nonatomic;
+    lbl_contended = Noncontended ;
     lbl_pos = (-1); lbl_all = [||]; lbl_repres = Record_regular;
     lbl_private = Public;
     lbl_loc = Location.none;
@@ -199,6 +201,7 @@ let label_descrs ty_res lbls repres priv =
             lbl_arg = l.ld_type;
             lbl_mut = l.ld_mutable;
             lbl_atomic = l.ld_atomic;
+            lbl_contended = l.ld_contended;
             lbl_pos = num;
             lbl_all = all_labels;
             lbl_repres = repres;

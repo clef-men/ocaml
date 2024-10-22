@@ -224,22 +224,32 @@ let transl_labels env univars closed lbls =
          raise(Error(loc, Duplicate_label name));
        all_labels := String.Set.add name !all_labels)
     lbls;
-  let mk {pld_name=name;pld_mutable=mut;pld_type=arg;pld_loc=loc;
-          pld_attributes=attrs} =
-    Builtin_attributes.warning_scope attrs
+  let mk lbl =
+    Builtin_attributes.warning_scope lbl.pld_attributes
       (fun () ->
-         let arg = Ast_helper.Typ.force_poly arg in
+         let arg = Ast_helper.Typ.force_poly lbl.pld_type in
          let cty = transl_simple_type env ?univars ~closed arg in
-         let is_atomic = Builtin_attributes.has_atomic attrs in
-         let is_mutable = match mut with Mutable -> true | Immutable -> false in
+         let is_atomic = Builtin_attributes.has_atomic lbl.pld_attributes in
+         let is_mutable = lbl.pld_mutable = Mutable in
          if is_atomic && not is_mutable then
-           raise (Error (loc, Atomic_field_must_be_mutable name.txt));
-         {ld_id = Ident.create_local name.txt;
-          ld_name = name;
+           raise (
+             Error (
+               lbl.pld_loc,
+               Atomic_field_must_be_mutable lbl.pld_name.txt
+              )
+           );
+         let is_contended =
+           Builtin_attributes.has_contended lbl.pld_attributes
+         in
+         {ld_id = Ident.create_local lbl.pld_name.txt;
+          ld_name = lbl.pld_name;
           ld_uid = Uid.mk ~current_unit:(Env.get_current_unit ());
-          ld_mutable = mut;
+          ld_mutable = lbl.pld_mutable;
           ld_atomic = if is_atomic then Atomic else Nonatomic;
-          ld_type = cty; ld_loc = loc; ld_attributes = attrs}
+          ld_contended = if is_contended then Contended else Noncontended;
+          ld_type = cty;
+          ld_loc = lbl.pld_loc;
+          ld_attributes = lbl.pld_attributes}
       )
   in
   let lbls = List.map mk lbls in
@@ -251,6 +261,7 @@ let transl_labels env univars closed lbls =
          {Types.ld_id = ld.ld_id;
           ld_mutable = ld.ld_mutable;
           ld_atomic = ld.ld_atomic;
+          ld_contended = ld.ld_contended;
           ld_type = ty;
           ld_loc = ld.ld_loc;
           ld_attributes = ld.ld_attributes;
