@@ -103,6 +103,7 @@ type prim =
   | Apply
   | Revapply
   | Atomic of atomic_op * atomic_kind
+  | Atomic_index
   | Isout
 
 let used_primitives = Hashtbl.create 7
@@ -395,6 +396,7 @@ let primitives_table =
     "%atomic_exchange_loc", Atomic(Exchange, Loc);
     "%atomic_cas_loc", Atomic(Cas, Loc);
     "%atomic_fetch_add_loc", Atomic(Faa, Loc);
+    "%atomic_index", Atomic_index;
     "%runstack", Primitive (Prunstack, 3);
     "%reperform", Primitive (Preperform, 3);
     "%perform", Primitive (Pperform, 1);
@@ -839,12 +841,15 @@ let lambda_of_prim prim_name prim loc args arg_exps =
       }
   | Atomic (op, kind), args ->
       lambda_of_atomic prim_name loc op kind args
+  | Atomic_index, [_; _] ->
+      Lprim (Pmakeblock (2, Immutable, Some [Pgenval; Pintval]), args, loc)
   | Isout, [_; _] ->
       Lprim (Pisout, args, loc)
   | (Raise _ | Raise_with_backtrace
     | Lazy_force | Loc _ | Primitive _ | Comparison _
     | Send | Send_self | Send_cache | Frame_pointers | Identity
     | Apply | Revapply
+    | Atomic_index
     | Isout
     ), _ ->
       raise(Error(to_location loc, Wrong_arity_builtin_primitive prim_name))
@@ -866,6 +871,7 @@ let check_primitive_arity loc p =
     | Identity -> p.prim_arity = 1
     | Apply | Revapply -> p.prim_arity = 2
     | Atomic (op, kind) -> p.prim_arity = atomic_arity op kind
+    | Atomic_index -> p.prim_arity = 2
     | Isout -> p.prim_arity = 2
   in
   if not ok then raise(Error(loc, Wrong_arity_builtin_primitive p.prim_name))
@@ -943,6 +949,7 @@ let primitive_needs_event_after = function
   | Loc _
   | Frame_pointers | Identity
   | Atomic (_, _)
+  | Atomic_index
   | Isout
     -> false
 
