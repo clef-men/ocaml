@@ -920,7 +920,7 @@ let lambda_primitive_needs_event_after = function
   | Pcompare_ints | Pcompare_floats
   | Pfloatcomp _ | Pstringlength | Pstringrefu | Pbyteslength | Pbytesrefu
   | Pbytessetu | Pmakearray ((Pintarray | Paddrarray | Pfloatarray), _)
-  | Parraylength _ | Parrayrefu _ | Parraysetu _ | Pisint | Pisout
+  | Parraylength _ | Parrayrefu _ | Parraysetu _ | Pisint | Pisout | Pcheckbound
   | Patomic_load
   | Pintofbint _ | Pctconst _ | Pbswap16 | Pint_as_pointer | Popaque | Pdls_get
   | Pmakelazyblock _
