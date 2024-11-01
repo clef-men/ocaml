@@ -586,6 +586,7 @@ module Arg            = Arg
 module Array          = Array
 module ArrayLabels    = ArrayLabels
 module Atomic         = Atomic
+module Atomic_array   = Atomic_array
 module Bigarray       = Bigarray
 module Bool           = Bool
 module Buffer         = Buffer

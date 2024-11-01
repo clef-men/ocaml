@@ -40,6 +40,17 @@ stdlib__Atomic.cmo : atomic.ml \
 stdlib__Atomic.cmx : atomic.ml \
     stdlib__Atomic.cmi
 stdlib__Atomic.cmi : atomic.mli
+stdlib__Atomic_array.cmo : atomic_array.ml \
+    stdlib__Obj.cmi \
+    stdlib__Atomic.cmi \
+    stdlib__Array.cmi \
+    stdlib__Atomic_array.cmi
+stdlib__Atomic_array.cmx : atomic_array.ml \
+    stdlib__Obj.cmx \
+    stdlib__Atomic.cmx \
+    stdlib__Array.cmx \
+    stdlib__Atomic_array.cmi
+stdlib__Atomic_array.cmi : atomic_array.mli
 stdlib__Bigarray.cmo : bigarray.ml \
     stdlib__Sys.cmi \
     stdlib__Complex.cmi \
