@@ -552,6 +552,7 @@ let rec transl env e =
          | Pcompare_ints | Pcompare_floats | Pcompare_bints _
          | Poffsetref _ | Pfloatcomp _ | Parraylength _
          | Parrayrefu _ | Parraysetu _ | Parrayrefs _ | Parraysets _
+         | Pcheckbound
          | Pbintofint _ | Pintofbint _ | Pcvtbint (_, _) | Pnegbint _
          | Paddbint _ | Psubbint _ | Pmulbint _ | Pdivbint _ | Pmodbint _
          | Pandbint _ | Porbint _ | Pxorbint _ | Plslbint _ | Plsrbint _
@@ -875,6 +876,7 @@ and transl_prim_1 env p arg dbg =
     | Pmodint _ | Pintcomp _ | Pfloatcomp _ | Pmakearray (_, _)
     | Pcompare_ints | Pcompare_floats | Pcompare_bints _
     | Pduparray (_, _) | Parrayrefu _ | Parraysetu _
+    | Pcheckbound
     | Parrayrefs _ | Parraysets _ | Paddbint _ | Psubbint _ | Pmulbint _
     | Pdivbint _ | Pmodbint _ | Pandbint _ | Porbint _ | Pxorbint _
     | Plslbint _ | Plsrbint _ | Pasrbint _ | Pbintcomp (_, _)
@@ -1003,6 +1005,8 @@ and transl_prim_2 env p arg1 arg2 dbg =
       arrayref_unsafe kind (transl env arg1) (transl env arg2) dbg
   | Parrayrefs kind ->
       arrayref_safe kind (transl env arg1) (transl env arg2) dbg
+  | Pcheckbound ->
+      make_checkbound dbg [transl env arg1; transl env arg2]
 
   (* Boxed integers *)
   | Paddbint bi ->
@@ -1135,6 +1139,7 @@ and transl_prim_3 env p arg1 arg2 arg3 dbg =
   | Pcompare_ints | Pcompare_floats | Pcompare_bints _
   | Poffsetint _ | Poffsetref _ | Pfloatcomp _ | Pmakearray (_, _)
   | Pduparray (_, _) | Parraylength _ | Parrayrefu _ | Parrayrefs _
+  | Pcheckbound
   | Pbintofint _ | Pintofbint _ | Pcvtbint (_, _) | Pnegbint _ | Paddbint _
   | Psubbint _ | Pmulbint _ | Pdivbint _ | Pmodbint _ | Pandbint _ | Porbint _
   | Pxorbint _ | Plslbint _ | Plsrbint _ | Pasrbint _ | Pbintcomp (_, _)
@@ -1168,6 +1173,7 @@ and transl_prim_4 env p arg1 arg2 arg3 arg4 dbg =
   | Pcompare_ints | Pcompare_floats | Pcompare_bints _
   | Poffsetint _ | Poffsetref _ | Pfloatcomp _ | Pmakearray (_, _)
   | Pduparray (_, _) | Parraylength _ | Parrayrefu _ | Parrayrefs _
+  | Pcheckbound
   | Pbintofint _ | Pintofbint _ | Pcvtbint (_, _) | Pnegbint _ | Paddbint _
   | Psubbint _ | Pmulbint _ | Pdivbint _ | Pmodbint _ | Pandbint _ | Porbint _
   | Pxorbint _ | Plslbint _ | Plsrbint _ | Pasrbint _ | Pbintcomp (_, _)
