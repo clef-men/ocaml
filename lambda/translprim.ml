@@ -87,6 +87,10 @@ type atomic_op =
   | Cas
   | Faa
 
+type safe_flag =
+  | Unsafe
+  | Safe
+
 type prim =
   | Primitive of Lambda.primitive * int
   | External of Primitive.description
@@ -103,6 +107,7 @@ type prim =
   | Apply
   | Revapply
   | Atomic of atomic_op * atomic_kind
+  | Atomic_index of safe_flag
 
 let used_primitives = Hashtbl.create 7
 let add_used_primitive loc env path =
@@ -394,6 +399,8 @@ let primitives_table =
     "%atomic_exchange_loc", Atomic(Exchange, Loc);
     "%atomic_cas_loc", Atomic(Cas, Loc);
     "%atomic_fetch_add_loc", Atomic(Faa, Loc);
+    "%atomic_unsafe_index", Atomic_index Unsafe;
+    "%atomic_index", Atomic_index Safe;
     "%runstack", Primitive (Prunstack, 3);
     "%reperform", Primitive (Preperform, 3);
     "%perform", Primitive (Pperform, 1);
@@ -749,6 +756,24 @@ let lambda_of_atomic prim_name loc op (kind : atomic_kind) args =
           let args = ptr :: ofs :: rest in
           Llet (Strict, Pgenval, varg, loc_arg, Lprim (prim, args, loc))
 
+let rec lambda_of_atomic_index safe_flag arg1 arg2 loc =
+  match safe_flag with
+  | Unsafe ->
+      let args = [arg1; arg2] in
+      Lprim (Pmakeblock (2, Immutable, Some [Pgenval; Pintval]), args, loc)
+  | Safe ->
+      let varg1 = Ident.create_local "array" in
+      let varg2 = Ident.create_local "index" in
+      let vlen = Ident.create_local "length" in
+      let len = Lprim (Parraylength Pgenarray, [Lvar varg1], loc) in
+      Llet (Strict, Pgenval, varg1, arg1,
+      Llet (Strict, Pgenval, varg2, arg2,
+      Llet (Alias, Pgenval, vlen, len,
+      Lsequence (
+        Lprim (Pcheckbound, [Lvar vlen; Lvar varg2], loc),
+        lambda_of_atomic_index Unsafe (Lvar varg1) (Lvar varg2) loc
+      ))))
+
 let caml_restore_raw_backtrace =
   Primitive.simple ~name:"caml_restore_raw_backtrace" ~arity:2 ~alloc:false
 
@@ -837,10 +862,13 @@ let lambda_of_prim prim_name prim loc args arg_exps =
       }
   | Atomic (op, kind), args ->
       lambda_of_atomic prim_name loc op kind args
+  | Atomic_index safe_flag, [arg1; arg2] ->
+      lambda_of_atomic_index safe_flag arg1 arg2 loc
   | (Raise _ | Raise_with_backtrace
     | Lazy_force | Loc _ | Primitive _ | Comparison _
     | Send | Send_self | Send_cache | Frame_pointers | Identity
     | Apply | Revapply
+    | Atomic_index _
     ), _ ->
       raise(Error(to_location loc, Wrong_arity_builtin_primitive prim_name))
 
@@ -861,6 +889,7 @@ let check_primitive_arity loc p =
     | Identity -> p.prim_arity = 1
     | Apply | Revapply -> p.prim_arity = 2
     | Atomic (op, kind) -> p.prim_arity = atomic_arity op kind
+    | Atomic_index _ -> p.prim_arity = 2
   in
   if not ok then raise(Error(loc, Wrong_arity_builtin_primitive p.prim_name))
 
@@ -938,6 +967,7 @@ let primitive_needs_event_after = function
   | Loc _
   | Frame_pointers | Identity
   | Atomic (_, _)
+  | Atomic_index _
     -> false
 
 let transl_primitive_application loc p env ty path exp args arg_exps =
