@@ -692,11 +692,17 @@ class texi =
                (List.flatten
                   (List.map
                      (fun constr ->
-                       (Raw ("  | " ^ constr.vc_name)) ::
-                       (Raw (self#string_of_type_args
-                               constr.vc_args constr.vc_ret)) ::
-                         (entry_doc constr.vc_text)
-                         ) l ) )
+                       Raw ("  | " ^ constr.vc_name) ::
+                       Raw (self#string_of_type_args
+                               constr.vc_args constr.vc_ret) ::
+                       let text = entry_doc constr.vc_text in
+                       if vc.unique = Unique then
+                         Raw " [@unique]" :: text
+                       else
+                         text
+                     ) l
+                  )
+               )
            | Type_record l ->
                (Raw (" = "^(if priv then "private " else "")^"{\n")) ::
                (List.flatten

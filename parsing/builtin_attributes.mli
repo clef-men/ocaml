@@ -187,3 +187,5 @@ val has_unboxed: Parsetree.attributes -> bool
 val has_boxed: Parsetree.attributes -> bool
 
 val has_atomic: Parsetree.attributes -> bool
+
+val has_unique: Parsetree.attributes -> bool

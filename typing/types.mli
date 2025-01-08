@@ -547,6 +547,7 @@ and constructor_declaration =
     cd_id: Ident.t;
     cd_args: constructor_arguments;
     cd_res: type_expr option;
+    cd_unique: unique_flag;
     cd_loc: Location.t;
     cd_attributes: Parsetree.attributes;
     cd_uid: Uid.t;

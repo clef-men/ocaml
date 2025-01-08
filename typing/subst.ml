@@ -362,6 +362,7 @@ let constructor_declaration copy_scope s c =
     cd_id = c.cd_id;
     cd_args = constructor_arguments copy_scope s c.cd_args;
     cd_res = Option.map (typexp copy_scope s) c.cd_res;
+    cd_unique = c.cd_unique;
     cd_loc = loc s c.cd_loc;
     cd_attributes = attrs s c.cd_attributes;
     cd_uid = c.cd_uid;

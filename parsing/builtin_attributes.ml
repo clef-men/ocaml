@@ -74,6 +74,7 @@ let builtin_attrs =
   ; "tailcall"
   ; "tail_mod_cons"
   ; "unboxed"
+  ; "unique"
   ; "untagged"
   ; "unrolled"
   ; "warnerror"
@@ -413,3 +414,5 @@ let has_unboxed attrs = has_attribute "unboxed" attrs
 let has_boxed attrs = has_attribute "boxed" attrs
 
 let has_atomic attrs = has_attribute "atomic" attrs
+
+let has_unique attrs = has_attribute "unique" attrs

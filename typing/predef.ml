@@ -134,6 +134,7 @@ let cstr id args =
     cd_id = id;
     cd_args = Cstr_tuple args;
     cd_res = None;
+    cd_unique = Shared;
     cd_loc = Location.none;
     cd_attributes = [];
     cd_uid = Uid.of_predef_id id;

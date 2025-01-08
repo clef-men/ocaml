@@ -107,6 +107,7 @@ type error =
   | Nonrec_gadt
   | Invalid_private_row_declaration of type_expr
   | Atomic_field_must_be_mutable of string
+  | Unique_constructor_must_be_immutable of string
 
 exception Error of Location.t * error
 

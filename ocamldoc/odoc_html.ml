@@ -1833,6 +1833,8 @@ class html =
                  bs b (" " ^ (self#keyword "->") ^ " ");
                  self#html_of_type_expr b father r;
             );
+            if constr.vc_unique then
+              bs b " [@unique]";
             bs b "</code></td>\n";
             (
              match constr.vc_text with
