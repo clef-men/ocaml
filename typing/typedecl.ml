@@ -76,6 +76,7 @@ type error =
   | Nonrec_gadt
   | Invalid_private_row_declaration of type_expr
   | Atomic_field_must_be_mutable of string
+  | Generative_constructor_must_be_immutable of string
 
 open Typedtree
 
@@ -372,7 +373,8 @@ let transl_declaration env sdecl (id, uid) =
     | Ptype_variant constructors -> begin match constructors with
         | [] -> bad "it has no constructor"
         | (_::_::_) -> bad "it has more than one constructor"
-        | [c] -> begin match c.pcd_args with
+        | [c] ->
+            begin match c.pcd_args with
             | Pcstr_tuple [] ->
                 bad "its constructor has no argument"
             | Pcstr_tuple (_::_::_) ->
@@ -387,7 +389,9 @@ let transl_declaration env sdecl (id, uid) =
                 bad "it is mutable"
             | Pcstr_record [{pld_mutable = Immutable}] ->
                 ()
-          end
+            end;
+            if Builtin_attributes.has_generative c.pcd_attributes then
+              bad "it is generative"
       end
   end;
   let unbox, unboxed_default =
@@ -421,10 +425,31 @@ let transl_declaration env sdecl (id, uid) =
            > (Config.max_tag + 1) then
           raise(Error(sdecl.ptype_loc, Too_many_constructors));
         let make_cstr scstr =
-          let name = Ident.create_local scstr.pcd_name.txt in
+          let name = Ident.create_local (scstr.pcd_name.txt) in
           let targs, tret_type, args, ret_type =
             make_constructor env scstr.pcd_loc (Path.Pident id) params
                              scstr.pcd_vars scstr.pcd_args scstr.pcd_res
+          in
+          let generative =
+            if Builtin_attributes.has_generative scstr.pcd_attributes then (
+              begin match targs with
+              | Cstr_tuple _ ->
+                  ()
+              | Cstr_record lbls ->
+                  List.iter (fun lbl ->
+                    if lbl.ld_mutable = Mutable then
+                      raise (
+                        Error (
+                          scstr.pcd_loc,
+                          Generative_constructor_must_be_immutable
+                            (Ident.name name)
+                        )
+                      )
+                  ) lbls
+              end;
+              Generative
+            ) else
+              Nongenerative
           in
           let tcstr =
             { cd_id = name;
@@ -433,6 +458,7 @@ let transl_declaration env sdecl (id, uid) =
               cd_vars = scstr.pcd_vars;
               cd_args = targs;
               cd_res = tret_type;
+              cd_generative = generative;
               cd_loc = scstr.pcd_loc;
               cd_attributes = scstr.pcd_attributes }
           in
@@ -440,6 +466,7 @@ let transl_declaration env sdecl (id, uid) =
             { Types.cd_id = name;
               cd_args = args;
               cd_res = ret_type;
+              cd_generative = generative;
               cd_loc = scstr.pcd_loc;
               cd_attributes = scstr.pcd_attributes;
               cd_uid = tcstr.cd_uid }
@@ -2273,6 +2300,10 @@ let report_error_doc ppf = function
         (Style.as_inline_code pp_private) ty
   | Atomic_field_must_be_mutable name ->
       fprintf ppf "@[The label %a must be mutable to be declared atomic.@]"
+        Style.inline_code name
+  | Generative_constructor_must_be_immutable name ->
+      fprintf ppf
+        "@[The constructor %a must be immutable to be declared generative.@]"
         Style.inline_code name
 
 let () =

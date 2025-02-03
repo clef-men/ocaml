@@ -62,6 +62,7 @@ let builtin_attrs =
   ; "deprecated"
   ; "deprecated_mutable"
   ; "explicit_arity"
+  ; "generative"
   ; "immediate"
   ; "immediate64"
   ; "inline"
@@ -413,3 +414,5 @@ let has_unboxed attrs = has_attribute "unboxed" attrs
 let has_boxed attrs = has_attribute "boxed" attrs
 
 let has_atomic attrs = has_attribute "atomic" attrs
+
+let has_generative attrs = has_attribute "generative" attrs
