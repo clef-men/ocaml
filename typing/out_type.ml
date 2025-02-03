@@ -1411,6 +1411,7 @@ let tree_of_single_constructor cd =
       ocstr_name = name;
       ocstr_args = args;
       ocstr_return_type = ret;
+      ocstr_generative = cd.cd_generative;
   }
 
 (* When printing GADT constructor, we need to forget the naming decision we took
