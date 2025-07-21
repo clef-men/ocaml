@@ -34,8 +34,10 @@ stdlib__ArrayLabels.cmx : arrayLabels.ml \
 stdlib__ArrayLabels.cmi : arrayLabels.mli \
     stdlib__Seq.cmi
 stdlib__Atomic.cmo : atomic.ml \
+    stdlib__Obj.cmi \
     stdlib__Atomic.cmi
 stdlib__Atomic.cmx : atomic.ml \
+    stdlib__Obj.cmx \
     stdlib__Atomic.cmi
 stdlib__Atomic.cmi : atomic.mli
 stdlib__Bigarray.cmo : bigarray.ml \
